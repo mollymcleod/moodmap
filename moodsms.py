@@ -1,7 +1,6 @@
 import os, urllib2
 import gspread
 from datetime import datetime
-from twilio.rest import TwilioRestClient
 from flask import Flask, request, render_template, redirect
 
 # Setup
@@ -35,17 +34,6 @@ def sms():
   return "added row"
 
 # Utils
-def send_reminder(phone_number):
-  body = 'How was your day? Reply 1-5 and a note'
-  send_message(phone_number, body)
-
-def send_message(phone_number, body):
-  account_sid = os.environ['ACCOUNT_SID']
-  auth_token = os.environ['AUTH_TOKEN']
-  twilio_number = os.environ['TWILIO_NUMBER']
-  client = TwilioRestClient(account_sid, auth_token)
-  client.sms.messages.create(to=phone_number, from_=twilio_number, body=body[:160])
-
 def add_row(row):
   if len(row) == 3:
     next_row = len(wks.col_values(1)) + 1
