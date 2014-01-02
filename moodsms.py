@@ -12,13 +12,14 @@ app.config['DEBUG'] = os.environ['DEBUG']
 doc_name = os.environ['GDOC_TITLE']
 username = os.environ['GOOGLE_USERNAME']
 password = os.environ['GOOGLE_PASSWORD']
+gdoc_url = 'https://docs.google.com/spreadsheet/pub?key=%s&single=true&gid=0&output=csv' % os.environ['GDOC_KEY']
 gc = gspread.login(username, password)
 wks = gc.open(doc_name).sheet1
 
 # Routes
 @app.route('/')
 def index():
-  gdoc_url = os.environ['GDOC_URL']
+  
   return render_template('calendar.html', gdoc_url=gdoc_url)
 
 @app.route('/sms')
