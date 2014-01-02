@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mood</title>
+
+  <!-- CSS -->
+  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">  
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+
+  <!-- Javascript -->
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+</head>
+
+<body>
+{% block content %}{% endblock %}
+</body>
+</html>
