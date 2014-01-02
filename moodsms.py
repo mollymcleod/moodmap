@@ -35,6 +35,10 @@ def sms():
   return "added row"
 
 # Utils
+def send_reminder(phone_number):
+  body = 'How was your day? Reply 1-5 and a note'
+  send_message(phone_number, body)
+
 def send_message(phone_number, body):
   account_sid = os.environ['ACCOUNT_SID']
   auth_token = os.environ['AUTH_TOKEN']
