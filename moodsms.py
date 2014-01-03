@@ -1,6 +1,7 @@
 import os, urllib2
 import gspread
 from datetime import datetime
+from babel.dates import format_datetime
 from flask import Flask, request, render_template, redirect
 
 # Setup
@@ -18,7 +19,6 @@ wks = gc.open(doc_name).sheet1
 # Routes
 @app.route('/')
 def index():
-  
   return render_template('calendar.html', gdoc_url=gdoc_url)
 
 @app.route('/sms')
@@ -27,7 +27,7 @@ def sms():
   from_number = request.values.get('From')
 
   # create next row
-  date = datetime.today()
+  date = format_datetime(datetime.now(), 'YYYY-MM-DD')
   mood = msg[0]
   note = msg[2:]
   add_row([date, mood, note])
