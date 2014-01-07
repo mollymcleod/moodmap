@@ -42,6 +42,7 @@ def sms():
           'note' : msg}
   u.add_datum(datum)
   db.session.add(u)
+  db.session.commit()
   return "added row"
 
 # Models
