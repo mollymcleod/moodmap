@@ -87,7 +87,8 @@ def get_or_create_user(phone_number):
   else:
     u = User(phone_number = phone_number)
     welcome = "Welcome! Reply with 1 (terrible) to 5 (awesome) + a note about your day. You can see your mood map at www.mood-sms.herokuapp.com/%s" % u.phone_number
-    return send_message(u.phone_number, welcome)
+    send_message(u.phone_number, welcome)
+    return u
 
 def send_message(phone_number, body):
   account_sid = os.environ['TWILIO_SID']
