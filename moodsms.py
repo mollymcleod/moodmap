@@ -22,10 +22,13 @@ def shutdown_session(exception=None):
 
 @app.route('/')
 def index():
-  # First user for now
-  u = User.query.first()
+  users = User.query.all()
+  return render_template('index.html', users = users)
+
+@app.route('/<phone_number>')
+def calendar(phone_number):
+  u = User.query.filter_by(phone_number = phone_number).first()
   return render_template('calendar.html', data = u.data)
-  # return render_template('calendar.html')
 
 @app.route('/sms')
 def sms():

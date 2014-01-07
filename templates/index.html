@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row-fluid">
+  <div class="span4 offset1">
+    <h1>Mood</h1> tracking.
+
+    <ul>
+      {% for u in users %}
+      <li><a href="{{ u.phone_number }}">{{ u.phone_number }}</a></li>
+      {% endfor %}
+    </ul>
+  
+  </div>
+</div>
+{% endblock %}
