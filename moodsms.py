@@ -50,9 +50,9 @@ def sms():
     db.session.add(u)
     db.session.commit()
     return msg
-  else:
-    correction = "Reply with a number 1-5 + a note, like this: '5. Great day hike in Muir Woods!'"
-    return send_message(u.phone_number, correction)
+  # else:
+  #   correction = "Reply with a number 1-5 + a note, like this: '5. Great day hike in Muir Woods!'"
+  #   return send_message(u.phone_number, correction)
 
 # Models
 class User(db.Model):
@@ -86,7 +86,7 @@ def get_or_create_user(phone_number):
     return u
   else:
     u = User(phone_number = phone_number)
-    welcome = "Welcome! Reply with a number 1 (terrible) to 5 (awesome) + a note about your day. Reply STOP and I'll be quiet."
+    welcome = "Welcome! Reply with 1 (terrible) to 5 (awesome) + a note about your day. You can see your mood map at www.mood-sms.herokuapp.com/%s" % u.phone_number
     return send_message(u.phone_number, welcome)
 
 def send_message(phone_number, body):
