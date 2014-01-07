@@ -48,7 +48,7 @@ def sms():
 # Models
 class User(db.Model):
   id = db.Column(db.Integer, primary_key=True)
-  phone_number = db.Column(db.String(11), unique=True)
+  phone_number = db.Column(db.String(20), unique=True)
   data = db.Column(db.Text())
   
   def __init__(self, phone_number, data = None):
