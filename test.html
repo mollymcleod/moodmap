@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Mood</title>
+
+  <!-- CSS -->
+  <link rel="shortcut icon" href="static/img/favicon.ico">  
+  <link href="static/css/bootstrap.min.css" rel="stylesheet">
+  <link href="static/css/styles.css" rel="stylesheet">
+
+  <!-- Javascript -->
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="static/js/tip.js"></script>
+  <script src="static/js/bootstrap.min.js"></script>
+  <script src="http://code.jquery.com/jquery.js"></script>
+</head>
+
+<body>
+<div class="row-fluid">
+  <div class="span4 offset1">
+    <h1>Mood</h1> tracking for <a href="http://www.jsol.me">jsol</a> for a year.
+  </div>
+</div>
+
+<script>
+
+/* Initialize tooltip */
+// tip = d3.tip().attr('class', 'd3-tip').html(function(d) { return d; });
+
+
+/* Invoke the tip in the context of your visualization */
+// vis.call(tip)
+
+// vis.selectAll('rect')
+//   .data(data)
+// .enter().append('rect')
+//   .attr('width', function() { return x.rangeBand() })
+//   .attr('height', function(d) { return h - y(d) })
+//   .attr('y', function(d) { return y(d) })
+//   .attr('x', function(d, i) { return x(i) })
+//   /* Show and hide tip on mouse events */
+//   .on('mouseover', tip.show)
+//   .on('mouseout', tip.hide)
+
+var tip = d3.tip()
+        .direction('e')
+        .offset([-5, 5])
+        .attr('class', 'd3-tip')
+        .html(function(d) { return data[d].note });
+
+var width = 960,
+    height = 136,
+    cellSize = 17; // cell size
+
+var day = d3.time.format("%w"),
+    week = d3.time.format("%U"),
+    percent = d3.format(".1%"),
+    format = d3.time.format("%Y-%m-%d");
+
+var color = d3.scale.quantize()
+    .domain([0, 5])
+    .range(d3.range(11).map(function(d) { return "q" + d + "-11"; }));
+
+var svg = d3.select("body").selectAll("svg")
+    .data([2014])
+  .enter().append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("class", "year")
+  .append("g")
+    .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
+  .call(tip);
+
+svg.append("text")
+    .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
+    .style("text-anchor", "middle")
+    .text(function(d) { return d; });
+
+// Don't need the .day here?
+var rect = svg.selectAll(".day")
+    .data(function(d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+  .enter().append("rect")
+    .attr("class", "day")
+    .attr("width", cellSize)
+    .attr("height", cellSize)
+    .attr("x", function(d) { return week(d) * cellSize; })
+    .attr("y", function(d) { return day(d) * cellSize; })
+    .datum(format)
+
+rect.append("date")
+    .text(function(d) { return d });
+
+svg.selectAll(".month")
+    .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
+  .enter().append("path")
+    .attr("class", "month")
+    .attr("d", monthPath);
+
+
+// var data;
+// d3.csv('https://docs.google.com/spreadsheet/pub?key=0AnFBBOclPdX5dEFHMGp2SUZHYmYtNEx6Nl80UmtFbFE&single=true&gid=0&output=csv', function(error, csv) {
+//   data = d3.nest()
+//     .key(function(d) { return d.Date; })
+//     .rollup(function(d) { return (d[0].Mood); })
+//     // .rollup(function(d) { return (d[0].Note); })
+//     .map(csv);
+
+//     // returns dict with dates as keys
+
+//   rect.filter(function(d) { return d in data; })
+//       .attr("class", function(d) { return "day " + color(data[d]); })
+//     .select("title")
+//       .text(function(d) { return d + ": " + percent(data[d]); });
+// });
+
+// var data = {"2013-12-24":"2",
+//           "2013-12-25":"2",
+//           "2013-12-27":"2",
+//           "2013-12-28":"3",
+//           "2013-12-30":"3",
+//           "2014-01-01":"3",
+//           "2014-01-02":"3",
+//           "2014-01-03":"3",
+//           "2014-01-04":"3",
+//           "2014-01-05":"4"};
+
+var data = {"2013-12-24":{'mood' : '2', 'note' : 'first note'},
+          "2013-12-25":{'mood' : '3', 'note' : 'second note'},
+          "2013-12-27":{'mood' : '3', 'note' : 'third note'},
+          "2013-12-28":{'mood' : '4', 'note' : 'date note 2013-12-28'},
+          "2013-12-30":{'mood' : '5', 'note' : ' note'},
+          "2014-01-01":{'mood' : '4', 'note' : ' note'},
+          "2014-01-02":{'mood' : '3', 'note' : 'note'},
+          "2014-01-03":{'mood' : '2', 'note' : 'note'},
+          "2014-01-04":{'mood' : '1', 'note' : 'second to last note'},
+          "2014-01-05":{'mood' : '1', 'note' : 'first note'}};
+
+var rect = rect.filter(function(d) { return d in data; });
+
+rect.attr("class", function(d) { return "day " + color(data[d].mood); })
+  .select("title")
+    .text(function(d) { return d + ": " + percent(data); });
+
+rect.append("note")
+  .text(function(d) { return data[d].note });
+
+rect.on('mouseover', tip.show)
+  .on('mouseout', tip.hide);
+
+// var node = svg.selectAll(".node")
+//     .data(nodes)
+//   .enter().append("g")
+//     .attr("class", "node")
+//     .call(force.drag);
+
+// node.append("circle")
+//     .attr("r", 4.5);
+
+// node.append("text")
+//     .attr("dx", 12)
+//     .attr("dy", ".35em")
+//     .text(function(d) { return d.name });
+
+function monthPath(t0) {
+  var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
+      d0 = +day(t0), w0 = +week(t0),
+      d1 = +day(t1), w1 = +week(t1);
+  return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
+      + "H" + w0 * cellSize + "V" + 7 * cellSize
+      + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
+      + "H" + (w1 + 1) * cellSize + "V" + 0
+      + "H" + (w0 + 1) * cellSize + "Z";
+}
+
+d3.select(self.frameElement).style("height", "2910px");
+</script>
+</body>
+</html>
