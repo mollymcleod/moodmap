@@ -59,7 +59,10 @@ class User(db.Model):
     self.data = text_data
 
   def get_data_as_json(self):
-    return json.loads(self.data)
+    if self.data:
+      return json.loads(self.data)
+    else:
+      return {}
 
   def add_datum(self, datum):
     data = self.get_data_as_json()
