@@ -68,7 +68,7 @@ class User(db.Model):
 
 # Utils
 def get_or_create_user(phone_number):
-  u = User.query.filter_by(phone_number = from_number).first()
+  u = User.query.filter_by(phone_number = phone_number).first()
   if u:
     return u
   else:
