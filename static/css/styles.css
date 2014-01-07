@@ -3,9 +3,13 @@ h1 {
   }
 
 body {
-  font: 10px sans-serif;
+  font: 14px sans-serif;
   height: 100%;
   shape-rendering: crispEdges;
+}
+
+.calendarContainer {
+  margin: 20px 0 20px -25px;
 }
 
 .day {

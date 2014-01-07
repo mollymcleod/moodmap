@@ -1,15 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="row-fluid">
-  <div class="span4 offset1">
-    <h1>Mood</h1> tracking for a year.
-
-    <ul>
-      {% for u in users %}
-      <li><a href="{{ u.phone_number }}">{{ u.phone_number }}</a></li>
-      {% endfor %}
-    </ul>
-  
-  </div>
-</div>
+<h1>Mood</h1> tracking for a year. Text (510) 213-6505 to get started.
+<hr>
+<ul>
+  {% for u in users %}
+  <li><a href="{{ u.phone_number }}">{{ u.phone_number }}</a></li>
+  {% endfor %}
+</ul>
 {% endblock %}

@@ -1,5 +1,6 @@
 import os, urllib2
 import json
+from twilio.rest import TwilioRestClient
 from datetime import datetime
 from babel.dates import format_datetime
 from flask import Flask, request, render_template, redirect
@@ -12,6 +13,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
 
 # Routes
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('error.html'), 404
+
 @app.teardown_request
 def shutdown_session(exception=None):
   try:
@@ -27,8 +32,8 @@ def index():
 
 @app.route('/<phone_number>')
 def calendar(phone_number):
-  u = User.query.filter_by(phone_number = phone_number).first()
-  return render_template('calendar.html', data = u.data)
+  u = User.query.filter_by(phone_number = phone_number).first_or_404()
+  return render_template('calendar.html', user = u)
 
 @app.route('/sms')
 def sms():
@@ -37,13 +42,17 @@ def sms():
   u = get_or_create_user(from_number)
 
   # add element
-  datum = {'date' : format_datetime(datetime.now(), 'YYYY-MM-DD'),
-          'mood': msg[0],
-          'note' : msg}
-  u.add_datum(datum)
-  db.session.add(u)
-  db.session.commit()
-  return "added row"
+  if valid_message(msg):
+    datum = {'date' : format_datetime(datetime.now(), 'YYYY-MM-DD'),
+            'mood': msg[0],
+            'note' : msg}
+    u.add_datum(datum)
+    db.session.add(u)
+    db.session.commit()
+    return msg
+  else:
+    correction = "Reply with a number 1-5 + a note, like this: '5. Great day hike in Muir Woods!'"
+    return send_message(u.phone_number, correction)
 
 # Models
 class User(db.Model):
@@ -76,10 +85,20 @@ def get_or_create_user(phone_number):
   if u:
     return u
   else:
-    return User(phone_number = phone_number)
+    u = User(phone_number = phone_number)
+    welcome = "Welcome! Reply with a number 1 (terrible) to 5 (awesome) + a note about your day. Reply STOP and I'll be quiet."
+    return send_message(u.phone_number, welcome)
 
-def add_row(row):
-  if len(row) == 3:
-    next_row = len(wks.col_values(1)) + 1
-    for index, c in enumerate(row):
-      wks.update_cell(next_row, index+1, c)
+def send_message(phone_number, body):
+  account_sid = os.environ['TWILIO_SID']
+  auth_token = os.environ['TWILIO_AUTH']
+  twilio_number = os.environ['TWILIO_NUM']
+  client = TwilioRestClient(account_sid, auth_token)
+  client.sms.messages.create(to=phone_number, from_=twilio_number, body=body[:160])
+  return body
+
+def valid_message(msg):
+  if msg and msg[0].isdigit() and int(msg[0]) in range(1,6):
+    return True
+  else:
+    return False

@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="row-fluid">
-  <div class="span4 offset1">
-    <h1>Mood</h1> tracking for a year.
-  </div>
-</div>
+<h1>{{user.phone_number}}</h1>
 
+<!-- <div class="calendarContainer1"></div> -->
+<div class="calendarContainer"></div>
+
+<!-- Build the calendar -->
 <script>
 {% autoescape false %}
 var tip = d3.tip()
@@ -27,7 +27,7 @@ var color = d3.scale.quantize()
     .domain([0, 5])
     .range(d3.range(11).map(function(d) { return "q" + d + "-11"; }));
 
-var svg = d3.select("body").selectAll("svg")
+var svg = d3.select(".calendarContainer").selectAll("svg")
     .data([2014])
   .enter().append("svg")
     .attr("width", width)
@@ -61,7 +61,7 @@ svg.selectAll(".month")
     .attr("class", "month")
     .attr("d", monthPath);
 
-var data = {{ data }};
+var data = {{ user.data }};
 
 var rect = rect.filter(function(d) { return d in data; });
 
@@ -89,4 +89,5 @@ function monthPath(t0) {
 d3.select(self.frameElement).style("height", "2910px");
 {% endautoescape %}
 </script>
+
 {% endblock %}
