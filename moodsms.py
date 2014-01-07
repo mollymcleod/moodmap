@@ -24,7 +24,7 @@ def shutdown_session(exception=None):
 def index():
   # First user for now
   u = User.query.first()
-  return render_template('calendar_v2.html', data = u.data)
+  return render_template('calendar.html', data = u.data)
   # return render_template('calendar.html')
 
 @app.route('/sms')
