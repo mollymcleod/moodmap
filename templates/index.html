@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1>Mood</h1> tracking for a year. Text (510) 213-6505 to get started.
+<h1>Mood</h1> tracking for 2014. Text your new username to <b>(510) 213-6505</b> to start.
 <hr>
 <ul>
   {% for u in users %}
-  <li><a href="{{ u.phone_number }}">{{ u.phone_number }}</a></li>
+  <li><a href="{{ u.username_url }}">{{ u.username }}</a></li>
   {% endfor %}
 </ul>
 {% endblock %}
