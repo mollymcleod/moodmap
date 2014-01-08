@@ -72,6 +72,7 @@ class User(db.Model):
     url = re.sub('[!@#$]', '', username)
     url = url.strip()
     url = url.replace(" ","-")
+    url = url.lower()
     return url
 
   def save_json_as_text(self, json_data):
@@ -113,7 +114,7 @@ def get_or_create_user(phone_number, username = None):
   else:
     u = User(phone_number = phone_number, username = username)
     db.session.add(u)
-    welcome = "Welcome! Reply with 1 (terrible) to 5 (awesome) + a note about your day. You can see your mood map at http://mood-sms.herokuapp.com/%s" % u.phone_number
+    welcome = "Welcome! Reply with 1 (terrible) to 5 (awesome) + a note about your day. You can see your mood map at http://mood-sms.herokuapp.com/%s" % u.username_url
     send_message(u.phone_number, welcome)
     return u
 
