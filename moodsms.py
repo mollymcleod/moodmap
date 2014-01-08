@@ -1,7 +1,6 @@
 import os, urllib2
 import json
 import re
-from pprint import pprint
 from twilio.rest import TwilioRestClient
 from datetime import datetime
 from babel.dates import format_datetime
