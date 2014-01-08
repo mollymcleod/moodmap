@@ -105,39 +105,6 @@ class User(db.Model):
       user_dicts.append(u.to_dict())
     return json.dumps(user_dicts)
 
-  @classmethod
-  def users_to_file(cls, filepath = None):
-    users_string = cls.users_to_json_string()
-    
-    if filepath is None:
-      timestamp = format_datetime(datetime.now(), 'YYYY-MM-DD-HH')
-      filepath = 'data/%s-data.txt' % timestamp
-    
-    f = open(filepath, 'w')
-    f.write(users_string)
-    f.close()
-    return filepath
-
-  @classmethod
-  def load_users_from_file(cls, filepath):
-    users_string=open(filepath).read()
-    users = json.loads(users_string)
-    
-    new_users = []
-    error_count = 0
-    for u in users:
-      try:
-        new_u = User(phone_number = u['phone_number'],
-                    username = u['username'],
-                    data = u.get('data'))
-        db.session.add(new_u)
-        new_users.append(new_u)
-      except Exception:
-        error_count += 1
-    
-    db.session.commit()
-    return new_users, error_count
-
 # Utils
 def get_or_create_user(phone_number, username = None):
   u = User.query.filter_by(phone_number = phone_number).first()
