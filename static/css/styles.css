@@ -9,7 +9,25 @@ body {
 }
 
 .calendarContainer {
-  margin: 20px 0 20px -25px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.calendar {
+  
+}
+
+.legendContainer {
+
+  
+}
+
+.legend {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  left: 20px;
+  top: 80px;
 }
 
 .day {
@@ -23,17 +41,17 @@ body {
   stroke-width: 2px;
 }
 
-.year .q0-11{fill:rgb(165,0,38)}
-.year .q1-11{fill:rgb(215,48,39)}
-.year .q2-11{fill:rgb(244,109,67)}
-.year .q3-11{fill:rgb(253,174,97)}
-.year .q4-11{fill:rgb(254,224,139)}
-.year .q5-11{fill:rgb(255,255,191)}
-.year .q6-11{fill:rgb(217,239,139)}
-.year .q7-11{fill:rgb(166,217,106)}
-.year .q8-11{fill:rgb(102,189,99)}
-.year .q9-11{fill:rgb(26,152,80)}
-.year .q10-11{fill:rgb(0,104,55)}
+.q0-11{fill:rgb(165,0,38)}
+.q1-11{fill:rgb(215,48,39)}
+.q2-11{fill:rgb(244,109,67)}
+.q3-11{fill:rgb(253,174,97)}
+.q4-11{fill:rgb(254,224,139)}
+.q5-11{fill:rgb(255,255,191)}
+.q6-11{fill:rgb(217,239,139)}
+.q7-11{fill:rgb(166,217,106)}
+.q8-11{fill:rgb(102,189,99)}
+.q9-11{fill:rgb(26,152,80)}
+.q10-11{fill:rgb(0,104,55)}
 
 .container { 
   margin: 0, auto;

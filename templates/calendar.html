@@ -2,8 +2,26 @@
 {% block content %}
 <h1>{{user.username}}'s mood</h1>
 
-<!-- <div class="calendarContainer1"></div> -->
-<div class="calendarContainer"></div>
+  <svg class="legend">
+    <rect class="day q2-11" width="17" height="17" x="0" y="0"></rect>
+    <text x="20" y="15" fill="grey">Worst</text>
+    
+    <rect class="day q4-11" width="17" height="17" x="0" y="20"></rect>
+    <!-- <text x="20" y="35" fill="grey">I love SVG!</text> -->
+
+    <rect class="day q6-11" width="17" height="17" x="0" y="40"></rect>
+    <text x="20" y="55" fill="grey">Ok</text>
+
+    <rect class="day q8-11" width="17" height="17" x="0" y="60"></rect>
+    <!-- <text x="20" y="75" fill="grey">I love SVG!</text> -->
+
+    <rect class="day q10-11" width="17" height="17" x="0" y="80"></rect>
+    <text x="20" y="95" fill="grey">Best</text>
+  </svg>
+
+  <div class="calendarContainer"></div>
+
+
 
 <!-- Build the calendar -->
 <script>
@@ -32,15 +50,16 @@ var svg = d3.select(".calendarContainer").selectAll("svg")
   .enter().append("svg")
     .attr("width", width)
     .attr("height", height)
-    .attr("class", "year")
+    .attr("class", "calendar")
   .append("g")
-    .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
+    .attr("transform", "translate(1, 1)")
+    // .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
   .call(tip);
 
-svg.append("text")
-    .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
-    .style("text-anchor", "middle")
-    .text(function(d) { return d; });
+// svg.append("text")
+//     .attr("transform", "translate(-6," + cellSize * 3.5 + ")rotate(-90)")
+//     .style("text-anchor", "middle")
+//     .text(function(d) { return d; });
 
 var rect = svg.selectAll(".day")
     .data(function(d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
@@ -61,9 +80,14 @@ svg.selectAll(".month")
     .attr("class", "month")
     .attr("d", monthPath);
 
-var data = {{ user.data }};
+var data = {{ user.data if user.data != None }}
 
+console.log('one')
+
+// This line breaks if data is empty (can't return d in null)
 var rect = rect.filter(function(d) { return d in data; });
+
+console.log('two')
 
 rect.attr("class", function(d) { return "day " + color(data[d].mood); })
   .select("title")
@@ -74,6 +98,7 @@ rect.append("note")
 
 rect.on('mouseover', tip.show)
   .on('mouseout', tip.hide);
+
 
 function monthPath(t0) {
   var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
