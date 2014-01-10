@@ -4,7 +4,7 @@ import re
 from twilio.rest import TwilioRestClient
 from datetime import datetime
 from babel.dates import format_datetime
-from flask import Flask, request, render_template, redirect
+from flask import Flask, request, render_template, redirect, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
 
 # Setup
@@ -31,10 +31,20 @@ def index():
   users = User.query.all()
   return render_template('index.html', users = users)
 
+@app.route('/users')
+def users():
+  users = User.query.all()
+  return render_template('users.html', users = users)
+
 @app.route('/<username_url>')
 def calendar(username_url):
   u = User.query.filter_by(username_url = username_url).first_or_404()
   return render_template('calendar.html', user = u)
+
+@app.route('/<username_url>/json')
+def json_data(username_url):
+  u = User.query.filter_by(username_url = username_url).first_or_404()
+  return u.data if u.data else 'no data here...'
 
 @app.route('/sms')
 def sms():

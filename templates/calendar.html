@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1>{{user.username}}'s mood</h1>
+<hr>
 
   <svg class="legend">
     <rect class="day q2-11" width="17" height="17" x="0" y="0"></rect>
@@ -20,6 +21,13 @@
   </svg>
 
   <div class="calendarContainer"></div>
+
+  <div class="stream">
+  {% set data = user.get_data_as_json() %}
+  {% for d in data %}
+  <p class="mood-{{ data[d].mood }}">{{ data[d].note }}</p>
+  {% endfor %}
+  </div>
 
 
 
