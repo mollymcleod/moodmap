@@ -21,13 +21,13 @@
   </svg>
 
 {% for user in users %}
-  <div class="{{ user.username_url }}_calendar"></div>
+  <div class="calendar_{{ user.id }}"></div>
   <hr class="minirule">
 
   <!-- Build the calendar -->
   <script>
   {% autoescape false %}
-  var tip = d3.tip()
+  var tip_{{ user.id }} = d3.tip()
           .direction('e')
           .offset([-5, 5])
           .attr('class', 'd3-tip')
@@ -46,7 +46,7 @@
       .domain([0, 5])
       .range(d3.range(11).map(function(d) { return "q" + d + "-11"; }));
 
-  var svg = d3.select(".{{ user.username_url }}_calendar").selectAll("svg")
+  var svg = d3.select(".calendar_{{ user.id }}").selectAll("svg")
       .data([2014])
     .enter().append("svg")
       .attr("width", width)
@@ -56,7 +56,7 @@
       .attr("transform", "translate(25, 2)")
       // .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
 
-    .call(tip);
+    .call(tip_{{ user.id }});
 
   svg.append("svg:a")
       .attr("xlink:href", "{{ user.username_url }}")
@@ -97,8 +97,8 @@
   rect.append("note")
     .text(function(d) { return data[d].note });
 
-  rect.on('mouseover', tip.show)
-    .on('mouseout', tip.hide);
+  rect.on('mouseover', tip_{{ user.id }}.show)
+    .on('mouseout', tip_{{ user.id }}.hide);
 
 
   function monthPath(t0) {
