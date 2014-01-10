@@ -32,8 +32,8 @@ a .yaxis-label, a:hover{
   width: 100px;
   height: 100px;
   position: absolute;
-  left: 20px;
   top:  90px;
+  margin-left: 975px;
 }
 
 .day {
