@@ -31,7 +31,7 @@
           .direction('e')
           .offset([-5, 5])
           .attr('class', 'd3-tip')
-          .html(function(d) { return data[d].note });
+          .html(function(d) { return data_{{ user.id }}[d].note });
 
   var width = 960,
       height = 136,
@@ -85,17 +85,17 @@
       .attr("class", "month")
       .attr("d", monthPath);
 
-  var data = {{ user.data if user.data != None else '[]'}};
+  var data_{{ user.id }} = {{ user.data if user.data != None else '{}'}};
 
   // This line breaks if data is empty (can't return d in null)
-  var rect = rect.filter(function(d) { return d in data; });
+  var rect = rect.filter(function(d) { return d in data_{{ user.id }}; });
 
-  rect.attr("class", function(d) { return "day " + color(data[d].mood); })
+  rect.attr("class", function(d) { return "day " + color(data_{{ user.id }}[d].mood); })
     .select("title")
-      .text(function(d) { return d + ": " + percent(data); });
+      .text(function(d) { return d + ": " + percent(data_{{ user.id }}); });
 
   rect.append("note")
-    .text(function(d) { return data[d].note });
+    .text(function(d) { return data_{{ user.id }}[d].note });
 
   rect.on('mouseover', tip_{{ user.id }}.show)
     .on('mouseout', tip_{{ user.id }}.hide);
