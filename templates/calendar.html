@@ -22,15 +22,6 @@
 
   <div class="calendarContainer"></div>
 
-  <div class="stream">
-  {% set data = user.get_data_as_json() %}
-  {% for d in data %}
-  <p class="mood-{{ data[d].mood }}">{{ data[d].note }}</p>
-  {% endfor %}
-  </div>
-
-
-
 <!-- Build the calendar -->
 <script>
 {% autoescape false %}
