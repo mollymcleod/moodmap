@@ -41,6 +41,16 @@ def calendar(username_url):
   u = User.query.filter_by(username_url = username_url).first_or_404()
   return render_template('calendar.html', user = u)
 
+@app.route('/invite/<phone_number>')
+def invite(phone_number = None):
+  u = User.query.filter_by(phone_number = phone_number).first()
+  if phone_number is None:
+    return 'What phone # do you want to invite?'
+  elif u:
+    return "Looks like they already joined!"
+  else:
+    return send_message(phone_number, render_template('invite.html'))
+
 @app.route('/<username_url>/json')
 def json_data(username_url):
   u = User.query.filter_by(username_url = username_url).first_or_404()
@@ -124,8 +134,7 @@ def get_or_create_user(phone_number, username = None):
   else:
     u = User(phone_number = phone_number, username = username)
     db.session.add(u)
-    welcome = "Welcome! Reply with 1 (terrible) to 5 (awesome) + a note about your day. You can see your mood map at http://mood-sms.herokuapp.com/%s" % u.username_url
-    send_message(u.phone_number, welcome)
+    send_message(u.phone_number, render_template('welcome.html', user = u))
     return u
 
 def send_message(phone_number, body):
