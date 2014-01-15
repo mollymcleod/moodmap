@@ -1,6 +1,7 @@
 import os, urllib2
 import json
 import re
+import operator
 from twilio.rest import TwilioRestClient
 from datetime import datetime
 from babel.dates import format_datetime
@@ -29,7 +30,8 @@ def shutdown_session(exception=None):
 @app.route('/')
 def index():
   users = User.query.all()
-  return render_template('index.html', users = users)
+  users_json = [u.to_json() for u in users]
+  return render_template('index.html', users = users, users_json = users_json)
 
 @app.route('/users')
 def users():
@@ -64,10 +66,10 @@ def sms():
 
   # add element
   if valid_message(msg):
-    datum = {'date' : format_datetime(datetime.now(), 'YYYY-MM-DD'),
+    entry = {'date' : format_datetime(datetime.now(), 'YYYY-MM-DD'),
             'mood': msg[0],
             'note' : msg}
-    u.add_datum(datum)
+    u.add_entry(entry)
     db.session.add(u)
     db.session.commit()
     return msg
@@ -95,20 +97,16 @@ class User(db.Model):
     url = url.lower()
     return url
 
-  def save_json_as_text(self, json_data):
-    text_data = json.dumps(json_data)
-    self.data = text_data
-
   def get_data_as_json(self):
     if self.data:
       return json.loads(self.data)
     else:
       return {}
 
-  def add_datum(self, datum):
+  def add_entry(self, entry):
     data = self.get_data_as_json()
-    data[datum['date']] = {'mood' : datum['mood'], 'note' : datum['note']}
-    self.save_json_as_text(data)
+    data[entry['date']] = {'mood' : entry['mood'], 'note' : entry['note']}
+    self.data = json.dumps(data)
 
   def to_dict(self):
     user_dict = self.__dict__
@@ -118,13 +116,13 @@ class User(db.Model):
       pass
     return user_dict
 
-  @classmethod
-  def users_to_json_string(cls):
-    user_dicts = []
-    users = cls.query.all()
-    for u in users:
-      user_dicts.append(u.to_dict())
-    return json.dumps(user_dicts)
+  def to_json(self):
+    u = self.to_dict()
+    try:
+      u['data'] = json.loads(u['data'])
+    except TypeError:
+      pass
+    return json.dumps(u)
 
 # Utils
 def get_or_create_user(phone_number, username = None):

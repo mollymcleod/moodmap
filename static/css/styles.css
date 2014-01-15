@@ -23,11 +23,6 @@ a .yaxis-label, a:hover{
   font-size: 10px;
 }
 
-.calendarContainer {
-  width: 100%;
-  margin-top: 20px;
-}
-
 .legend {
   width: 100px;
   height: 100px;
@@ -44,7 +39,7 @@ a .yaxis-label, a:hover{
 .month {
   fill: none;
   stroke: #000;
-  stroke-width: 2px;
+  stroke-width: 1px;
 }
 
 .stream {

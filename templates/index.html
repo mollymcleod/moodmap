@@ -2,116 +2,17 @@
 {% block content %}
 <h1>Mood</h1> tracking for 2014. Text your new username to <b>(510) 213-6505</b> to start.
 <hr>
+  <!-- Build legend -->
+  {% include 'legend.html' %}
+  
+  <!-- Build one calendar per user -->
+  {% for u in users %}
+    <div class="calendar_{{ u.id }}"></div>
+    {% set u_json = u.to_json() %}
+    <script>createCalendar({{ u_json|safe }})</script>
+    <hr class="minirule">
+  {% endfor %}  
+  
+  
 
-  <svg class="legend">
-    <rect class="day q2-11" width="17" height="17" x="0" y="0"></rect>
-    <text x="20" y="15" fill="grey">Terrible</text>
-    
-    <rect class="day q4-11" width="17" height="17" x="0" y="20"></rect>
-
-    <rect class="day q6-11" width="17" height="17" x="0" y="40"></rect>
-    <text x="20" y="55" fill="grey">Ok</text>
-
-    <rect class="day q8-11" width="17" height="17" x="0" y="60"></rect>
-
-    <rect class="day q10-11" width="17" height="17" x="0" y="80"></rect>
-    <text x="20" y="95" fill="grey">Awesome</text>
-  </svg>
-
-{% for user in users %}
-  <div class="calendar_{{ user.id }}"></div>
-  <hr class="minirule">
-
-  <!-- Build the calendar -->
-  <script>
-  {% autoescape false %}
-  var tip_{{ user.id }} = d3.tip()
-          .direction('e')
-          .offset([-5, 5])
-          .attr('class', 'd3-tip')
-          .html(function(d) { return data_{{ user.id }}[d].note });
-
-  var width = 960,
-      height = 136,
-      cellSize = 17; // cell size
-
-  var day = d3.time.format("%w"),
-      week = d3.time.format("%U"),
-      percent = d3.format(".1%"),
-      format = d3.time.format("%Y-%m-%d");
-
-  var color = d3.scale.quantize()
-      .domain([0, 5])
-      .range(d3.range(11).map(function(d) { return "q" + d + "-11"; }));
-
-  var svg = d3.select(".calendar_{{ user.id }}").selectAll("svg")
-      .data([2014])
-    .enter().append("svg")
-      .attr("width", width)
-      .attr("height", height)
-      .attr("class", "calendar")
-    .append("g")
-      .attr("transform", "translate(25, 2)")
-      // .attr("transform", "translate(" + ((width - cellSize * 53) / 2) + "," + (height - cellSize * 7 - 1) + ")")
-
-    .call(tip_{{ user.id }});
-
-  svg.append("svg:a")
-      .attr("xlink:href", "{{ user.username_url }}")
-    .append("text")
-      .attr("transform", "translate(-8," + cellSize * 3.5 + ")rotate(-90)")
-      .attr("class", "yaxis-label")
-      .style("text-anchor", "middle")
-      .text('{{ user.username }}');
-
-  var rect = svg.selectAll(".day")
-      .data(function(d) { return d3.time.days(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
-    .enter().append("rect")
-      .attr("class", "day")
-      .attr("width", cellSize)
-      .attr("height", cellSize)
-      .attr("x", function(d) { return week(d) * cellSize; })
-      .attr("y", function(d) { return day(d) * cellSize; })
-      .datum(format)
-
-  rect.append("date")
-      .text(function(d) { return d });
-
-  svg.selectAll(".month")
-      .data(function(d) { return d3.time.months(new Date(d, 0, 1), new Date(d + 1, 0, 1)); })
-    .enter().append("path")
-      .attr("class", "month")
-      .attr("d", monthPath);
-
-  var data_{{ user.id }} = {{ user.data if user.data != None else '{}'}};
-
-  // This line breaks if data is empty (can't return d in null)
-  var rect = rect.filter(function(d) { return d in data_{{ user.id }}; });
-
-  rect.attr("class", function(d) { return "day " + color(data_{{ user.id }}[d].mood); })
-    .select("title")
-      .text(function(d) { return d + ": " + percent(data_{{ user.id }}); });
-
-  rect.append("note")
-    .text(function(d) { return data_{{ user.id }}[d].note });
-
-  rect.on('mouseover', tip_{{ user.id }}.show)
-    .on('mouseout', tip_{{ user.id }}.hide);
-
-
-  function monthPath(t0) {
-    var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
-        d0 = +day(t0), w0 = +week(t0),
-        d1 = +day(t1), w1 = +week(t1);
-    return "M" + (w0 + 1) * cellSize + "," + d0 * cellSize
-        + "H" + w0 * cellSize + "V" + 7 * cellSize
-        + "H" + w1 * cellSize + "V" + (d1 + 1) * cellSize
-        + "H" + (w1 + 1) * cellSize + "V" + 0
-        + "H" + (w0 + 1) * cellSize + "Z";
-  }
-
-  d3.select(self.frameElement).style("height", "2910px");
-  {% endautoescape %}
-  </script>
-  {% endfor %}
 {% endblock %}
