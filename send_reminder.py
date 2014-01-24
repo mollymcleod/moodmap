@@ -1,4 +1,4 @@
-from moodsms import *
+from mood import *
 
 users = User.query.all()
 reminder_message = '''How was your day? Reply with a number 1-5 and a note, like this:

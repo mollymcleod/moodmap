@@ -1,1 +1,1 @@
-web: gunicorn moodsms:app
+web: gunicorn mood:app
