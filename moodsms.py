@@ -7,12 +7,18 @@ from datetime import datetime
 from babel.dates import format_datetime
 from flask import Flask, request, render_template, redirect, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
+from flask.ext.script import Manager
+from flask.ext.migrate import Migrate, MigrateCommand
 
 # Setup
 app = Flask(__name__)
 app.config['DEBUG'] = os.environ['DEBUG']
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
+manager = Manager(app)
+manager.add_command('db', MigrateCommand)
 
 # Routes
 @app.errorhandler(404)
@@ -82,6 +88,7 @@ class User(db.Model):
   username_url = db.Column(db.String(80), unique=True)
   username = db.Column(db.String(80))
   phone_number = db.Column(db.String(20), unique=True)
+  entries = db.relationship('Entry', backref='user', lazy='dynamic')
   data = db.Column(db.Text())
   
   def __init__(self, phone_number, username, data = None):
@@ -109,20 +116,67 @@ class User(db.Model):
     self.data = json.dumps(data)
 
   def to_dict(self):
-    user_dict = self.__dict__
+    user_dict = dict(self.__dict__)
     try:
       del user_dict['_sa_instance_state']
-    except KeyError:
+    except Exception:
       pass
     return user_dict
 
   def to_json(self):
-    u = self.to_dict()
+    # build data from entries
+    data = {}
+    entries = self.entries
+    for e in entries:
+      e_dict = e.to_dict()
+      data[e_dict['date']] = e_dict
+    
+    # add data to user dict
+    u_dict = self.to_dict()
+    u_dict['data'] = data
+
+    return json.dumps(u_dict)
+
+class Entry(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+  date = db.Column(db.DateTime)
+  mood = db.Column(db.Integer)
+  note = db.Column(db.String)
+  
+  def __init__(self, mood, note, date = datetime.now()):
+    self.mood = mood
+    self.note = note
+    self.date = date
+
+  def to_dict(self):
+    entry_dict = dict(self.__dict__)
     try:
-      u['data'] = json.loads(u['data'])
-    except TypeError:
+      entry_dict['date'] = format_datetime(entry_dict['date'], 'YYYY-MM-DD')
+    except Exception:
       pass
-    return json.dumps(u)
+    try:
+      del entry_dict['_sa_instance_state']
+    except Exception:
+      pass
+    return entry_dict
+
+  def to_json(self):
+    return json.dumps(self.to_dict())
+
+# Scripts
+@manager.command
+def migrate_data_to_entries():
+    users = User.query.all()
+    for u in users:
+      datum = u.get_data_as_json()
+      for d_key in datum.keys():
+        date = datetime.strptime(d_key, "%Y-%m-%d")
+        mood = int(datum[d_key]['mood'])
+        note = datum[d_key]['note']
+        u.entries.append(Entry(mood = mood, note = note, date = date))
+      db.session.add(u)
+    db.session.commit()
 
 # Utils
 def get_or_create_user(phone_number, username = None):
@@ -148,3 +202,6 @@ def valid_message(msg):
     return True
   else:
     return False
+
+if __name__ == '__main__':
+    manager.run()
