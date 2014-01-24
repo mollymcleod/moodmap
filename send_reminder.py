@@ -1,9 +1,9 @@
 from moodsms import *
 
 users = User.query.all()
-reminder_message = '''How was your day? Reply with # + a note about something memorable.
-1 = Terrible
-5 = Awesome
+reminder_message = '''How was your day? Reply with a number 1-5 and a note, like this:
+'5. Awesome day hiking!'
+'1. Terrible day :(!
 Good night :)'''
 
 for u in users:
