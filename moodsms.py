@@ -72,10 +72,8 @@ def sms():
 
   # add element
   if valid_message(msg):
-    entry = {'date' : format_datetime(datetime.now(), 'YYYY-MM-DD'),
-            'mood': msg[0],
-            'note' : msg}
-    u.add_entry(entry)
+    entry = Entry(msg[0], msg)
+    u.entries.append(entry)
     db.session.add(u)
     db.session.commit()
     return msg
@@ -109,11 +107,6 @@ class User(db.Model):
       return json.loads(self.data)
     else:
       return {}
-
-  def add_entry(self, entry):
-    data = self.get_data_as_json()
-    data[entry['date']] = {'mood' : entry['mood'], 'note' : entry['note']}
-    self.data = json.dumps(data)
 
   def to_dict(self):
     user_dict = dict(self.__dict__)
