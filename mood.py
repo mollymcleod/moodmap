@@ -142,7 +142,7 @@ class Entry(db.Model):
     self.note = note
 
     # save <before 10am as 11pm yesterday
-    hr = int(format_datetime(now, 'HH'))
+    hr = int(format_datetime(date, 'HH'))
     if hr < 10:
       yesterday = date - timedelta(hours = hr + 1)
       self.date = yesterday
