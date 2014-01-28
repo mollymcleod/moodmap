@@ -3,7 +3,7 @@ import json
 import re
 import operator
 from twilio.rest import TwilioRestClient
-from datetime import datetime
+from datetime import datetime, timedelta
 from babel.dates import format_datetime
 from flask import Flask, request, render_template, redirect, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -140,7 +140,14 @@ class Entry(db.Model):
   def __init__(self, mood, note, date = datetime.now()):
     self.mood = mood
     self.note = note
-    self.date = date
+
+    # save <before 10am as 11pm yesterday
+    hr = int(format_datetime(now, 'HH'))
+    if hr < 10:
+      yesterday = date - timedelta(hours = hr + 1)
+      self.date = yesterday
+    else:
+      self.date = date
 
   def to_dict(self):
     entry_dict = dict(self.__dict__)
