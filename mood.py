@@ -152,7 +152,7 @@ class Entry(db.Model):
   def to_dict(self):
     entry_dict = dict(self.__dict__)
     try:
-      entry_dict['date'] = format_datetime(entry_dict['date'], 'YYYY-MM-DD')
+      entry_dict['date'] = format_datetime(entry_dict['date'], 'YYYY-MM-dd')
     except Exception:
       pass
     try:
