@@ -3,7 +3,7 @@ import json
 import re
 import operator
 from twilio.rest import TwilioRestClient
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from babel.dates import format_datetime
 from flask import Flask, request, render_template, redirect, jsonify
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -141,11 +141,10 @@ class Entry(db.Model):
     self.mood = mood
     self.note = note
 
-    # save <before 10am as 11pm yesterday
+    # save before noon as 11pm yesterday
     hr = int(format_datetime(date, 'HH'))
-    if hr < 10:
-      yesterday = date - timedelta(hours = hr + 1)
-      self.date = yesterday
+    if hr < 12:
+      self.date = date - timedelta(hours = hr + 1)
     else:
       self.date = date
 
@@ -178,7 +177,35 @@ def migrate_data_to_entries():
       db.session.add(u)
     db.session.commit()
 
+@manager.command
+def send_nightly_reminder():
+  users = User.query.all()
+  send_announcement(render_template('nightly-reminder.html'), users)
+
+@manager.command
+def test_nightly_reminder():
+  users = [User.query.filter_by(username = 'Jake').first()]
+  send_announcement(render_template('nightly-reminder.html'), users)
+
+@manager.command
+def send_morning_reminder():
+  yesterday = date.today() - timedelta(days = 1)
+  users_to_remind = get_pending_users(day = yesterday)
+  send_announcement(render_template('morning-reminder.html'), users_to_remind)
+
 # Utils
+def get_pending_users(day = date.today()):
+  '''Get users who haven't logged the given day'''
+  # set to midnight
+  day = datetime.combine(day, datetime.min.time())
+  pending_users = []
+  users = User.query.all()
+  for u in users:
+    # This is a bug...will only work for yesterday right now
+    if u.entries.filter(Entry.date >= day).first() is None:
+      pending_users.append(u)
+  return pending_users
+
 def get_or_create_user(phone_number, username = None):
   u = User.query.filter_by(phone_number = phone_number).first()
   if u:
@@ -188,6 +215,10 @@ def get_or_create_user(phone_number, username = None):
     db.session.add(u)
     send_message(u.phone_number, render_template('welcome.html', user = u))
     return u
+
+def send_announcement(body, users = None):
+  for u in users:
+    send_message(u.phone_number, body)
 
 def send_message(phone_number, body):
   account_sid = os.environ['TWILIO_SID']
