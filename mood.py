@@ -10,12 +10,13 @@ from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
-# Setup
+# Setup app
 app = Flask(__name__)
 app.config['DEBUG'] = os.environ['DEBUG']
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
 
+# Setup scripts
 migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
@@ -32,6 +33,13 @@ def shutdown_session(exception=None):
     db.session.remove()
   except:
     db.session.rollback()
+
+@app.route('/log')
+def log():
+  app.logger.warning('A warning occurred (%d apples)', 42)
+  app.logger.error('An error occurred')
+  app.logger.info('Info')
+  return 'foo'
 
 @app.route('/')
 def index():
@@ -62,23 +70,24 @@ def invite(phone_number = None):
 @app.route('/<username_url>/json')
 def json_data(username_url):
   u = User.query.filter_by(username_url = username_url).first_or_404()
-  return u.data if u.data else 'no data here...'
+  return u.to_json() if u.to_json() else 'no data here...'
 
 @app.route('/sms')
 def sms():
   msg = request.values.get('Body')
   from_number = request.values.get('From')
   u = get_or_create_user(from_number, msg)
+  app.logger.info('SMS From: %s, Msg: %s, User: %s' %(from_number, msg, u.username))
 
-  # add element
-  if valid_message(msg):
+  # Add entry
+  if u and valid_message(msg):
     entry = Entry(msg[0], msg)
     u.entries.append(entry)
     db.session.add(u)
     db.session.commit()
-    return msg
+    return 'added entry: %s' % msg
   else:
-    return "invalid msg"
+    return "invalid msg..."
 
 # Models
 class User(db.Model):
@@ -89,18 +98,11 @@ class User(db.Model):
   entries = db.relationship('Entry', backref='user', lazy='dynamic')
   data = db.Column(db.Text())
   
-  def __init__(self, phone_number, username, data = None):
+  def __init__(self, phone_number, username):
+    username_url = username_to_url(username)
     self.phone_number = phone_number
     self.username = username
-    self.username_url = self.username_to_url(username)
-    self.data = data
-
-  def username_to_url(self, username):
-    url = re.sub('[!@#$]', '', username)
-    url = url.strip()
-    url = url.replace(" ","-")
-    url = url.lower()
-    return url
+    self.username_url = username_url
 
   def get_data_as_json(self):
     if self.data:
@@ -194,6 +196,13 @@ def send_morning_reminder():
   send_announcement(render_template('morning-reminder.html'), users_to_remind)
 
 # Utils
+def username_to_url(username):
+    url = re.sub('[!@#$]', '', username)
+    url = url.strip()
+    url = url.replace(" ","-")
+    url = url.lower()
+    return url
+
 def get_pending_users(day = date.today()):
   '''Get users who haven't logged the given day'''
   # set to midnight
@@ -207,10 +216,21 @@ def get_pending_users(day = date.today()):
   return pending_users
 
 def get_or_create_user(phone_number, username = None):
+  # Get existing users
   u = User.query.filter_by(phone_number = phone_number).first()
   if u:
+    app.logger.info('Found existing user: %s' % u.username)
     return u
+  
+  # Check for duplicate username
+  elif User.query.filter_by(username_url = username_to_url(username)).first():
+    app.logger.info('Duplicate username')
+    send_message(phone_number, render_template('username-taken.html', username = username))
+    raise ValueError('Username taken. Try again!')
+
+  # Create new user
   else:
+    app.logger.info('Creating new user: %s' % username)
     u = User(phone_number = phone_number, username = username)
     db.session.add(u)
     send_message(u.phone_number, render_template('welcome.html', user = u))
