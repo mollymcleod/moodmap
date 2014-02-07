@@ -34,13 +34,6 @@ def shutdown_session(exception=None):
   except:
     db.session.rollback()
 
-@app.route('/log')
-def log():
-  app.logger.warning('A warning occurred (%d apples)', 42)
-  app.logger.error('An error occurred')
-  app.logger.info('Info')
-  return 'foo'
-
 @app.route('/')
 def index():
   users = User.query.all()
@@ -79,8 +72,22 @@ def sms():
   u = get_or_create_user(from_number, msg)
   app.logger.info('SMS From: %s, Msg: %s, User: %s' %(from_number, msg, u.username))
 
+  # Check for invite
+  invited_phone_number = parse_phone_number(msg)
+  if u and invited_phone_number:
+    app.logger.info('Inviting phone #: %s' % invited_phone_number)
+    invited_u = User.query.filter_by(phone_number = invited_phone_number).first()
+    if invited_u:
+      app.logger.info('Invited duplicate...')
+      return send_message(from_number, render_template('duplicate-invite.html'))
+    else:
+      app.logger.info('Successfully invited %s!' % invited_phone_number)
+      send_message(from_number, render_template('thanks-invite.html'))
+      return send_message(invited_phone_number, render_template('invite.html'))
+
   # Add entry
-  if u and valid_message(msg):
+  # Change this to parse_entry and get m and note from it
+  elif u and valid_entry(msg):
     entry = Entry(msg[0], msg)
     u.entries.append(entry)
     db.session.add(u)
@@ -248,11 +255,18 @@ def send_message(phone_number, body):
   client.sms.messages.create(to=phone_number, from_=twilio_number, body=body[:160])
   return body
 
-def valid_message(msg):
+def valid_entry(msg):
   if msg and msg[0].isdigit() and int(msg[0]) in range(1,6):
     return True
   else:
     return False
+
+def parse_phone_number(msg):
+  phone_re = re.compile(r'\(?(\d{3})\)?[ -.]?(\d{3})[ -.]?(\d{4})', re.VERBOSE)
+  m = phone_re.search(msg)
+  if m:
+    phone_number = m.group(1) + m.group(2) + m.group(3)
+    return phone_number
 
 if __name__ == '__main__':
     manager.run()
