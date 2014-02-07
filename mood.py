@@ -265,7 +265,7 @@ def parse_phone_number(msg):
   phone_re = re.compile(r'\(?(\d{3})\)?[ -.]?(\d{3})[ -.]?(\d{4})', re.VERBOSE)
   m = phone_re.search(msg)
   if m:
-    phone_number = m.group(1) + m.group(2) + m.group(3)
+    phone_number = '+1' + m.group(1) + m.group(2) + m.group(3)
     return phone_number
 
 if __name__ == '__main__':
