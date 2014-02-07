@@ -79,6 +79,7 @@ def sms():
     invited_u = User.query.filter_by(phone_number = invited_phone_number).first()
     if invited_u:
       app.logger.info('Invited duplicate...')
+      send_message(invited_u.phone_number, render_template('poke.html'))
       return send_message(from_number, render_template('duplicate-invite.html'))
     else:
       app.logger.info('Successfully invited %s!' % invited_phone_number)
