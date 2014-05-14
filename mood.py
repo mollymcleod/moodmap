@@ -2,6 +2,7 @@ import os, urllib2
 import json
 import re
 import operator
+from random import choice
 from twilio.rest import TwilioRestClient
 from datetime import datetime, timedelta, date
 from babel.dates import format_datetime
@@ -190,7 +191,12 @@ def migrate_data_to_entries():
 @manager.command
 def send_nightly_reminder():
   users = User.query.all()
-  send_announcement(render_template('nightly-reminder.html'), users)
+  reminder_template = choice(['nightly-reminder-1.html', 
+                    'nightly-reminder-2.html',
+                    'nightly-reminder-3.html',
+                    'nightly-reminder-4.html',
+                    'nightly-reminder-5.html'])
+  send_announcement(render_template(reminder_template), users)
 
 @manager.command
 def test_nightly_reminder():
@@ -253,7 +259,10 @@ def send_message(phone_number, body):
   auth_token = os.environ['TWILIO_AUTH']
   twilio_number = os.environ['TWILIO_NUM']
   client = TwilioRestClient(account_sid, auth_token)
-  client.sms.messages.create(to=phone_number, from_=twilio_number, body=body[:160])
+  try:
+    client.sms.messages.create(to=phone_number, from_=twilio_number, body=body[:160])
+  except Exception:
+    pass
   return body
 
 def valid_entry(msg):
