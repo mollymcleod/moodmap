@@ -12,14 +12,20 @@ You'll need:
 - A Twilio account
 - PostgresSQL
 
-1) Clone repo: `git clone https://github.com/lippytak/mood-map.git`
+1) Clone repo:
+
+`git clone https://github.com/lippytak/mood-map.git`
 
 2) Create virtual environment and source it:
+
 `cd mood-map`
+
 `virtualenv venv`
+
 `source venv/bin/activate`
 
 3) Install stuff
+
 `pip install -r requirements.txt`
 
 4) Create a `.env` file with the following variables (remove the brackets):
@@ -32,10 +38,19 @@ DATABASE_URL=postgres://[USERNAME]@localhost/mood
 ```
 
 5) Setup database
+
 `sudo -u [YOUR POSTGRES USERNAME] createdb mood`
+
 `foreman run python`
+
 `from mood import db`
+
 `db.create_all()`
 
 6) Run locally
+
 `foreman start`
+
+7) Check it out at `localhost:8000`
+
+Remember to source your shell (`source venv/bin/activate`) whenever you restart your terminal.
