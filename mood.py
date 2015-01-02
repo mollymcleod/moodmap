@@ -199,6 +199,12 @@ def send_nightly_reminder():
   send_announcement(render_template(reminder_template), users)
 
 @manager.command
+def send_closing_time():
+  users = User.query.all()
+  reminder_template = 'closing-time.html'
+  send_announcement(render_template(reminder_template), users)
+
+@manager.command
 def test_nightly_reminder():
   users = [User.query.filter_by(username = 'Jake').first()]
   send_announcement(render_template('nightly-reminder.html'), users)
