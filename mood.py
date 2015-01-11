@@ -137,6 +137,7 @@ class User(db.Model):
     
     # add data to user dict
     u_dict = self.to_dict()
+    del u_dict['phone_number']
     u_dict['data'] = data
 
     return json.dumps(u_dict)
