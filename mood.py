@@ -177,6 +177,11 @@ class Entry(db.Model):
 
 # Scripts
 @manager.command
+def send_alive_again():
+  users = User.query.all()
+  send_announcement('alive-again.html', users)
+
+@manager.command
 def send_nightly_reminder():
   users = User.query.all()
   reminder_template = choice(['nightly-reminder-1.html', 
