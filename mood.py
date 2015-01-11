@@ -176,19 +176,6 @@ class Entry(db.Model):
 
 # Scripts
 @manager.command
-def migrate_data_to_entries():
-    users = User.query.all()
-    for u in users:
-      datum = u.get_data_as_json()
-      for d_key in datum.keys():
-        date = datetime.strptime(d_key, "%Y-%m-%d")
-        mood = int(datum[d_key]['mood'])
-        note = datum[d_key]['note']
-        u.entries.append(Entry(mood = mood, note = note, date = date))
-      db.session.add(u)
-    db.session.commit()
-
-@manager.command
 def send_nightly_reminder():
   users = User.query.all()
   reminder_template = choice(['nightly-reminder-1.html', 
@@ -196,24 +183,13 @@ def send_nightly_reminder():
                     'nightly-reminder-3.html',
                     'nightly-reminder-4.html',
                     'nightly-reminder-5.html'])
-  send_announcement(render_template(reminder_template), users)
-
-@manager.command
-def send_closing_time():
-  users = User.query.all()
-  reminder_template = 'closing-time.html'
-  send_announcement(render_template(reminder_template), users)
-
-@manager.command
-def test_nightly_reminder():
-  users = [User.query.filter_by(username = 'Jake').first()]
-  send_announcement(render_template('nightly-reminder.html'), users)
+  send_announcement(reminder_template, users)
 
 @manager.command
 def send_morning_reminder():
   yesterday = date.today() - timedelta(days = 1)
   users_to_remind = get_pending_users(day = yesterday)
-  send_announcement(render_template('morning-reminder.html'), users_to_remind)
+  send_announcement('morning-reminder.html', users_to_remind)
 
 # Utils
 def username_to_url(username):
@@ -256,9 +232,9 @@ def get_or_create_user(phone_number, username = None):
     send_message(u.phone_number, render_template('welcome.html', user = u))
     return u
 
-def send_announcement(body, users = None):
+def send_announcement(template, users = None):
   for u in users:
-    send_message(u.phone_number, body)
+    send_message(u.phone_number, render_template(template, user = u))
 
 def send_message(phone_number, body):
   account_sid = os.environ['TWILIO_SID']
