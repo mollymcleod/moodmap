@@ -20,7 +20,7 @@ function createCalendar(user)
         .html(function(d) { return data[d].note });
 
   var svg = d3.select(".calendar_" + user.id).selectAll("svg")
-      .data([2015])
+      .data([2016])
     .enter().append("svg")
       .attr("width", width)
       .attr("height", height)
